@@ -12,6 +12,7 @@ class Search:
         self.url = URL
 
     def search_char(self, search_character_query):
+        import pdb; pdb.set_trace();
         returned_data = self.fetch_char(search_character_query)
         cache_flag = returned_data[1]
         character_data = returned_data[0][0]["character_info"]
@@ -75,6 +76,7 @@ class Search:
 
     @persistant_cache('query_data.json')
     def fetch_char(self, *args):
+        import pdb; pdb.set_trace();
         fetch_char_query = args[0]
         search_params = {"name": fetch_char_query}
         char_req = requests.get(self.url, params=search_params)
