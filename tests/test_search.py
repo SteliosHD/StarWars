@@ -1,12 +1,13 @@
+import unittest
+
 import sys
 import os
 
 # a little trick to ensure that it can be run from anywhere not best practice indeed
-# root_dir = os.path.dirname(os.getcwd())
-# sys.path.append(root_dir)
+root_dir = os.path.dirname(os.getcwd())
+os.chdir(root_dir)
+sys.path.append(root_dir)
 
-from core.application_constants import data_dir
-import unittest
 from core.search import *
 from tests.search_constants import *
 from time import sleep
