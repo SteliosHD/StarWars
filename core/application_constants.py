@@ -1,6 +1,6 @@
 import sys
 import os
-root_dir = os.path.dirname(os.getcwd())
+root_dir = os.getcwd()
 sys.path.append(root_dir)
 
 '''

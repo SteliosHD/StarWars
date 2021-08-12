@@ -2,7 +2,7 @@
 import json
 from datetime import datetime
 from core.application_constants import data_dir
-
+import os
 
 def persistant_cache(file_name):
     """
@@ -48,7 +48,10 @@ def persistant_cache(file_name):
                                            "world_time_cached": {}}
                     file_cache = open(full_path, 'w')
                     json.dump(cache, file_cache)
+                    file_cache.flush()
+                    os.fsync(file_cache.fileno())
                     file_cache.close()
+
                 else:
                     cache_flag = 1
             elif len(argv) == 3:
@@ -64,6 +67,8 @@ def persistant_cache(file_name):
                     cache[search_query].update({"world_info": world_info,   "world_time_cached": cache_time})
                     file_cache = open(full_path, 'w')
                     json.dump(cache, file_cache)
+                    file_cache.flush()
+                    os.fsync(file_cache.fileno())
                     file_cache.close()
                 else:
                     cache_flag = 1

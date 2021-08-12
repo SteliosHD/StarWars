@@ -3,6 +3,10 @@ search_query_1 = "yoda"
 search_query_2 = "luke"
 search_query_3 = "whatever"
 
+yoda_url = "https://www.swapi.tech/api/planets/28"
+luke_url = 'https://www.swapi.tech/api/planets/1'
+bad_url = "https://myresponseisdumbbuttestsomething.com"
+
 print_name = "Luke Skywalker"
 print_height = "172"
 print_mass = "77"
@@ -39,8 +43,6 @@ luke_skywalker = {'height': '172',
                   'eye_color': 'blue',
                   'birth_year': '19BBY',
                   'gender': 'male',
-                  'created': '2021-08-11T11:10:19.975Z',
-                  'edited': '2021-08-11T11:10:19.975Z',
                   'name': 'Luke Skywalker',
                   'homeworld': 'https://www.swapi.tech/api/planets/1',
                   'url': 'https://www.swapi.tech/api/people/1'
@@ -53,8 +55,6 @@ tatooine = {'diameter': '10465',
             'climate': 'arid',
             'terrain': 'desert',
             'surface_water': '1',
-            'created': '2021-08-11T11:10:19.977Z',
-            'edited': '2021-08-11T11:10:19.977Z',
             'name': 'Tatooine',
             'url': 'https://www.swapi.tech/api/planets/1'
             }
@@ -66,8 +66,6 @@ yoda = {"height": "66",
         "eye_color": "brown",
         "birth_year": "896BBY",
         "gender": "male",
-        "created": "2021-08-11T11:10:19.975Z",
-        "edited": "2021-08-11T11:10:19.975Z",
         "name": "Yoda",
         "homeworld": "https://www.swapi.tech/api/planets/28",
         "url": "https://www.swapi.tech/api/people/20"}
@@ -80,7 +78,5 @@ yodas_planet = {'diameter': '0',
                 'climate': 'unknown',
                 'terrain': 'unknown',
                 'surface_water': 'unknown',
-                'created': '2021-08-11T11:10:19.977Z',
-                'edited': '2021-08-11T11:10:19.977Z',
                 'name': 'unknown',
                 'url': 'https://www.swapi.tech/api/planets/28'}

@@ -15,7 +15,7 @@ class Search:
         char_returned_data, cache_flag = self.fetch_char(search_character_query)
         character_data = char_returned_data["character_info"]
         if character_data:
-            properties = character_data["result"][0]["properties"]
+            properties = character_data#["result"][0]["properties"]
             char_name = properties["name"]
             char_height = properties["height"]
             char_mass = properties["mass"]
