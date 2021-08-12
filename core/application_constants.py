@@ -1,21 +1,14 @@
-from pathlib import Path
-# from sys import platform
+import sys
+import os
+root_dir = os.path.dirname(os.getcwd())
+sys.path.append(root_dir)
 
 '''
 This module contains constants that should be globally available to all classes
 '''
 
-data_dir = Path("data")
-URL = "https://www.swapi.tech/"
+data_dir = os.path.join(root_dir, "data/")
+URL = "https://www.swapi.tech/api/"
 EARTH_ORBITAL_PERIOD= 365
 EARTH_ROTATION_PERIOD= 24
-
-
-# if platform == "linux" or platform == "linux2":
-#     dataset = Path("data")
-#     TRUST_FILE_PATH = dataset/"trust.txt"
-#     RATINGS_FILE_PATH = dataset/"rating_with_timestamp.txt"
-# else:
-#     dataset = Path("dataset")
-#     TRUST_FILE_PATH = dataset/"trust.txt"
-#     RATINGS_FILE_PATH = dataset/"rating_with_timestamp.txt"
+DEFAULT_FILENAME = 'query_data.json'
