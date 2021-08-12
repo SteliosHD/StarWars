@@ -1,34 +1,45 @@
 # search module
+from datetime import datetime
+
 import requests
 import os
 import json
 from core.application_constants import URL, EARTH_ORBITAL_PERIOD, EARTH_ROTATION_PERIOD, DEFAULT_FILENAME, data_dir
-from core.cache import persistant_cache
 
 
 class Search:
 
-    def __init__(self):
+    def __init__(self, filename=''):
         self.url = URL
+        self.world_url = ''
+        self.suffix = ''
+        self.fetch_char_query = ''
+        self.search_params = ''
+        self.type_search = ''  # types : 'simple' or 'complex'
+        if filename:
+            self.filename = filename
+        else:
+            self.filename = DEFAULT_FILENAME
+        self.data_directory = data_dir
 
     def search_char(self, search_character_query, world_flag, silent=False):
         char_returned_data, cache_flag = self.fetch_char(search_character_query)
         character_data = char_returned_data["character_info"]
         if character_data:
-            properties = character_data#["result"][0]["properties"]
+            properties = character_data  # ["result"][0]["properties"]
             char_name = properties["name"]
             char_height = properties["height"]
             char_mass = properties["mass"]
             char_birth_year = properties["birth_year"]
-            homeworld_url = properties["homeworld"]  # get homeworld planet url
+            self.world_url = properties["homeworld"]  # get homeworld planet url
             if cache_flag:
                 cache_info = char_returned_data["character_time_cached"]
             else:
                 cache_info = ''
             if world_flag:
-                world_returned_data, cache_flag = self.fetch_char_with_world(search_character_query, homeworld_url)
+                world_returned_data, cache_flag = self.fetch_char_with_world(self.fetch_char_query, self.world_url)
                 planet_data = world_returned_data["world_info"]
-                planet_properties = planet_data["result"]["properties"]  # does not need [0] cause it returns a dict
+                planet_properties = planet_data  # ["result"]["properties"]  # does not need [0] cause it returns a dict
                 planet_name = planet_properties["name"]
                 planet_population = planet_properties["population"]
                 planet_orbital_period = int(planet_properties["orbital_period"])
@@ -71,7 +82,6 @@ class Search:
                 print_params = 0
         return print_params
 
-    @persistant_cache("test_search.json")
     def fetch_char(self, search_character_query):
         """
         Returns a dictionary (cause of the decorator) of the form:
@@ -82,25 +92,14 @@ class Search:
                           "world_time_cached": world_cache_time}
 
         """
-        fetch_char_query = search_character_query
-        suffix = "people/"
-        search_params = {"name": fetch_char_query}
+        self.fetch_char_query = search_character_query
+        self.suffix = "people/"
+        self.search_params = {"name": self.fetch_char_query}
+        self.type_search = 'simple'
 
-        # no check on request seemed a bit overkill
-        char_response = requests.get(self.url + suffix, params=search_params)
-        if char_response.ok:
-            char_data = json.loads(char_response.text)["result"]
-            # if search query found a character get the properties or else return empty dict
-            if char_data:
-                char_data = char_data[0]["properties"]  # get the properties dictionary
-            else:
-                char_data = {}
-        else:
-            print("Bad response: ", char_response)
-            char_data = {"Bad Response": "Bad response"}
-        return char_data
+        data, flag = self.get_data_from_cache_or_fetch()
+        return data, flag
 
-    @persistant_cache("test_search.json")
     def fetch_char_with_world(self, search_character_query, world_url):
         """
         !!!!
@@ -120,34 +119,145 @@ class Search:
                           "world_time_cached": world_cache_time}
 
         """
-        fetch_world_url = world_url
+        self.fetch_char_query = search_character_query
+        self.world_url = world_url
+        self.type_search = 'complex'
+        data, flag = self.get_data_from_cache_or_fetch()
+        return data, flag
 
-        # no check on request seemed a bit overkill
-        world_response = requests.get(fetch_world_url)
-        if world_response.ok:
-            world_data = json.loads(world_response.text)["result"]["properties"]  # get the properties dictionary
+    def get_data_from_cache_or_fetch(self):
+        """
+        Initially was a decorator but didn't behave so well so I modified it in order to meet the deadline
+        not the most elegant approach but it works.
+
+        """
+        full_path = self.data_directory + self.filename
+
+        try:
+            cache_file = open(full_path, 'r')
+            cache = json.load(cache_file)
+            cache_file.close()
+        except (IOError, ValueError):
+            cache = {}
+
+        # use the flag to identify if cached was used
+        cache_flag = 0
+
+        # should have been more deeper in the function but we don't care so much about accuracy
+        cache_time = 'cached: ' + str(datetime.now())
+
+        if self.type_search == 'simple':
+            # check if fetch_char_query is in cache and update character info and character cache time or return cached
+            # caller function must return character info as the first element
+            if self.fetch_char_query not in cache:
+                # no check on request seemed a bit overkill
+                char_response = requests.get(self.url + self.suffix, params=self.search_params)
+                if char_response.ok:
+                    char_data = json.loads(char_response.text)["result"]
+                    # if search query found a character get the properties or else return empty dict
+                    if char_data:
+                        char_info = char_data[0]["properties"]  # get the properties dictionary
+                    else:
+                        char_info = {}
+                else:
+                    print("Bad response: ", char_response)
+                    char_info = {"Bad Response": "Bad response"}
+
+                cache[self.fetch_char_query] = {"character_info": char_info,
+                                                "world_info": {},
+                                                "character_time_cached": cache_time,
+                                                "world_time_cached": {}}
+                file_cache = open(full_path, 'w')
+
+                # write file immediately
+                json.dump(cache, file_cache)
+                file_cache.flush()
+                os.fsync(file_cache.fileno())
+                file_cache.close()
+
+            else:
+                cache_flag = 1
+        elif self.type_search == 'complex':
+            # if world_query search was given check if it is in world_info_dict and update
+            # assuming that fetch_char function has already run and fetch_char_query is in the cache when
+            # fetch_char_with_world is run.
+            if not cache[self.fetch_char_query]["world_info"]:
+                # no check on request seemed a bit overkill but it will fail with bad url
+                world_response = requests.get(self.world_url)
+                if world_response.ok:
+                    world_info = json.loads(world_response.text)["result"][
+                        "properties"]  # get the properties dictionary
+                else:
+                    print("Bad Response: ", world_response)
+                    world_info = {"Bad Response": "Bad response"}
+                cache[self.fetch_char_query].update({"world_info": world_info,
+                                                     "world_time_cached": cache_time})
+                file_cache = open(full_path, 'w')
+                json.dump(cache, file_cache)
+
+                # write file immediately
+                file_cache.flush()
+                os.fsync(file_cache.fileno())
+                file_cache.close()
+            else:
+                cache_flag = 1
         else:
-            print("Bad Response: ", world_response)
-            world_data = {"Bad Response": "Bad response"}
-        return world_data
+            cache[self.fetch_char_query] = {"character_info": {},
+                                            "world_info": {},
+                                            "character_time_cached": {},
+                                            "world_time_cached": {}}
 
-    ####################################################################################################################
-    #                                           Static Methods                                                         #
-    ####################################################################################################################
+        return cache[self.fetch_char_query], cache_flag
 
-    @staticmethod
-    def delete_cache():
+    def delete_cache(self):
         """
         Static Method
         Clear cache by deleting the query_data.json file
         """
         try:
-            os.remove(data_dir + 'query_data.json')
+            os.remove(self.data_directory + self.filename)
             print("removed cache")
             return True
         except FileNotFoundError:
             print("This galaxy was clean from the start stormtrooper!")
             return False
+
+    def get_history(self, silent=False):
+        full_path = self.data_directory + self.filename
+        history = {}
+        print_params = []
+        try:
+            cache_file = open(full_path, 'r')
+            cache = json.load(cache_file)
+            cache_file.close()
+            for index, key in enumerate(cache.keys()):
+                history.update({"search" + str(index): {"search": key,
+                                                        "result": [cache[key]["character_info"],
+                                                                   cache[key]["world_info"]],
+                                                        "search_time": [cache[key]["character_time_cached"],
+                                                                        cache[key]["world_time_cached"]]
+                                                        }})
+            for key in history.keys():
+                val = history[key]
+                search = val['search']
+                result = val['result']
+                search_time = val["search_time"]
+                print_params.append('Search: {}\nResults: {}\nSearch Times: {}\n'.format(search, str(result), str(search_time)))
+            if silent:
+                return print_params
+            else:
+                print(print_params)
+
+        except (IOError, ValueError):
+            print_params = "No stars in this galaxy. Somebody has messed with the cache files"
+            if silent:
+                return print_params
+            else:
+                print(print_params)
+
+    ####################################################################################################################
+    #                                           Static Methods                                                         #
+    ####################################################################################################################
 
     @staticmethod
     def print_results(*argv, cache_info='', include_world=False, silent=False):
@@ -169,8 +279,8 @@ class Search:
             print_params.append("Name: " + planet_name)
             print_params.append("Population: " + planet_population)
             print_params.append("On {}, 1 year on earth is {:.2f} years and 1 day {:.2f} days".format(planet_name,
-                                                                                                     planet_year_dur,
-                                                                                                     planet_day_dur))
+                                                                                                      planet_year_dur,
+                                                                                                      planet_day_dur))
         if cache_info:
             print_params.append(cache_info)
 

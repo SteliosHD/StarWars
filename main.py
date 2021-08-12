@@ -1,5 +1,6 @@
 import argparse
 from core.search import Search
+from time import sleep
 
 
 def main_parser():
@@ -8,7 +9,7 @@ def main_parser():
     """
 
     parser = argparse.ArgumentParser(prog="PROG")
-    parser.add_argument("function", choices=["search", "cache", "intro"])
+    parser.add_argument("function", choices=["search", "cache", "history", "intro"])
     parser.add_argument("character", type=str, nargs="?")
     parser.add_argument("--world",  action="count", required=False, default=0)
     parser.add_argument("--clean", action="count", required=False, default=0)
@@ -16,35 +17,50 @@ def main_parser():
 
     #  check function (search , cache, or intro )
     if args.function == 'search':
-        print("im in search")
         # check if character was given
         if args.character:
             # check if world was given
             if args.world >= 1:
-                print(args.character,args.world)
+                search_call(args.character, show_world=True)
+                # print(args.character,args.world)
             else:
-                print(args.character)
+                search_call(args.character)
     elif args.function == "cache":
-        print("im in cache")
         # if character with cache raise exception
         if args.character:
             raise Exception("error: unrecognized arguments: ", args.character)
         if args.clean >= 1:
-            print(args.function, args.clean)
+            clean_cache()
         else:
-            print(args.function)
+            print("No command was given Commander!")
+    elif args.function == "history":
+        get_history()
     else:
-        print("intro")
+        message = """In a galaxy far, far away from Canes Venatici I., on a planet called Earth,
+        there exist a passionate programmer working with his computer and a semi-broken fan in
+            order to land a job. There are signs that the force is strong within this young padawan.
+                Prove his worth he must.\n"""
+        for char in message:
+            print(char, end='', flush=True)
+            sleep(.075)
 
 
 def search_call(search_query,  show_world=False):
-    pass
+    search_obj = Search()
+    search_obj.search_char(search_query, world_flag=show_world)
+    return 1
 
 
-def clean_cache(object_name):
-    pass
+def clean_cache():
+    search_obj = Search() # bound to the object but will delete the file anyways
+    search_obj.delete_cache()
+    return 1
 
 
+def get_history():
+    search_obj = Search() # bound to the object but will delete the file anyways
+    search_obj.get_history()
+    return 1
 
 
 if __name__ == "__main__":
