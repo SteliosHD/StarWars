@@ -25,10 +25,18 @@ class SwapiDAO:
         self.cache_obj = PersistentCache(self.filename)
 
     def search_char(self, search_character_query, world_flag, silent=False):
+        """
+        Search the character and the world info based on the search query
+        The search is handled by swapi automatically.
+        search_char returns print params if silent else it prints the results of the query.
+        search_char uses the fetch_char and fetch_char_with_world functions
+        IMPORTANT fetch_char_with_world  must always be called after fetch char in order to create
+        an entry in the cache with the search_query!
+        """
         char_returned_data, cache_flag = self.fetch_char(search_character_query)
         character_data = char_returned_data["character_info"]
         if character_data:
-            properties = character_data  # ["result"][0]["properties"]
+            properties = character_data
             char_name = properties["name"]
             char_height = properties["height"]
             char_mass = properties["mass"]
@@ -41,7 +49,7 @@ class SwapiDAO:
             if world_flag:
                 world_returned_data, cache_flag = self.fetch_char_with_world(self.fetch_char_query, self.world_url)
                 planet_data = world_returned_data["world_info"]
-                planet_properties = planet_data  # ["result"]["properties"]  # does not need [0] cause it returns a dict
+                planet_properties = planet_data
                 planet_name = planet_properties["name"]
                 planet_population = planet_properties["population"]
                 planet_orbital_period = int(planet_properties["orbital_period"])

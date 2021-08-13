@@ -45,7 +45,7 @@ def main_parser():
             print(char, end='', flush=True)
             sleep(.075)
 
-
+# Helper Functions
 def search_call(search_query,  show_world=False):
     swapi_obj = SwapiDAO()
     swapi_obj.search_char(search_query, world_flag=show_world)

@@ -14,7 +14,11 @@ class PersistentCache:
         self.data_directory = data_dir
 
     def check_cache(self, search_query, world_flag=False):
+        """
+        Check if the info we want is in the cache and return True or False
+        """
         cache, full_path = self._check_get_cache_file()
+        # what type of info to check
         if world_flag:
             try:
                 if cache[search_query]["world_info"]:
@@ -72,6 +76,9 @@ class PersistentCache:
             return 0
 
     def get_cached_data(self, search_query):
+        """
+        Get data from the cache
+        """
         cache, full_path = self._check_get_cache_file()
         try:
             data = cache[search_query]
@@ -94,6 +101,11 @@ class PersistentCache:
             return False
 
     def get_history(self, silent=False):
+        """
+        Return the history of searches
+        If silent it will print else it will return the print parameters in the form of a string
+        if we want to process the data just change the append method.
+        """
         full_path = self.data_directory + self.filename
         history = {}
         print_params = []
@@ -128,6 +140,11 @@ class PersistentCache:
                 print(print_params)
 
     def _check_get_cache_file(self):
+        """
+        Helper method to read the cache
+        It's loaded many times
+        Probably could be improved if it's store inside the class somewhere
+        """
         full_path = self.data_directory + self.filename
 
         try:
