@@ -3,7 +3,7 @@ Star Wars  Existanze Assessment
 
 Consuming the swapi! 
 
-By choice, I used as few tools as possible. Caching could be performed with reqquests-cache library (or 
+By choice, I used as few tools as possible. Caching could be performed with requests-cache library (or 
 similar). Json files were used for cache.
 
 #### About the author:
