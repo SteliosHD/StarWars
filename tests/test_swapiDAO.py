@@ -5,11 +5,11 @@ import os
 
 # a little trick to ensure that it can be run from anywhere not best practice indeed
 root_dir = os.path.dirname(os.getcwd())
-os.chdir(root_dir)
+# os.chdir(root_dir)
 sys.path.append(root_dir)
 
-from core.search import *
-from tests.search_constants import *
+from core.swapiDAO import *
+from tests.test_swapiDAO_constants import *
 from time import sleep
 
 
@@ -41,7 +41,7 @@ class TestSearch(unittest.TestCase):
             print("This galaxy was clean from the start stormtrooper!")
 
     def setUp(self):
-        self.search_test_object = Search(test_filename)
+        self.search_test_object = SwapiDAO(test_filename)
 
     def test_search_char(self):
         # with no flag silent

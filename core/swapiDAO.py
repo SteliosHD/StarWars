@@ -7,7 +7,7 @@ import json
 from core.application_constants import URL, EARTH_ORBITAL_PERIOD, EARTH_ROTATION_PERIOD, DEFAULT_FILENAME, data_dir
 
 
-class Search:
+class SwapiDAO:
 
     def __init__(self, filename=''):
         self.url = URL

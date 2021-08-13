@@ -1,5 +1,5 @@
 import argparse
-from core.search import Search
+from core.swapiDAO import SwapiDAO
 from time import sleep
 
 
@@ -46,20 +46,20 @@ def main_parser():
 
 
 def search_call(search_query,  show_world=False):
-    search_obj = Search()
-    search_obj.search_char(search_query, world_flag=show_world)
+    swapi_obj = SwapiDAO()
+    swapi_obj.search_char(search_query, world_flag=show_world)
     return 1
 
 
 def clean_cache():
-    search_obj = Search() # bound to the object but will delete the file anyways
-    search_obj.delete_cache()
+    swapi_obj = SwapiDAO() # bound to the object but will delete the file anyways
+    swapi_obj.delete_cache()
     return 1
 
 
 def get_history():
-    search_obj = Search() # bound to the object but will delete the file anyways
-    search_obj.get_history()
+    swapi_obj = SwapiDAO() # bound to the object but will delete the file anyways
+    swapi_obj.get_history()
     return 1
 
 
