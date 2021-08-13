@@ -9,9 +9,9 @@ root_dir = os.path.dirname(os.getcwd())
 sys.path.append(root_dir)
 
 from core.swapiDAO import *
+from core.cache import *
 from tests.test_swapiDAO_constants import *
 from time import sleep
-
 
 test_filename = "test_search.json"
 
@@ -19,7 +19,6 @@ test_filename = "test_search.json"
 class TestSwapiDAO(unittest.TestCase):
     """Some testing is better than no testing"""
 
-    
     @classmethod
     def setUpClass(cls):
         # if test_cache data file exists before running the test delete the datafile
@@ -41,44 +40,45 @@ class TestSwapiDAO(unittest.TestCase):
             print("This galaxy was clean from the start stormtrooper!")
 
     def setUp(self):
-        self.search_test_object = SwapiDAO(test_filename)
+        self.swapi_test_obj = SwapiDAO(test_filename)
+        self.cache_test_obj = PersistentCache(test_filename)
 
     def test_search_char(self):
         # with no flag silent
-        returned_params_no_flag_1 = self.search_test_object.search_char(search_query_1, False, silent=True)
+        returned_params_no_flag_1 = self.swapi_test_obj.search_char(search_query_1, False, silent=True)
         sleep(2)
-        returned_params_no_flag_2 = self.search_test_object.search_char(search_query_2, False, silent=True)
+        returned_params_no_flag_2 = self.swapi_test_obj.search_char(search_query_2, False, silent=True)
         returned_params_no_flag_2.pop()
         sleep(2)
-        returned_params_no_flag_3 = self.search_test_object.search_char(search_query_3, False, silent=True)
+        returned_params_no_flag_3 = self.swapi_test_obj.search_char(search_query_3, False, silent=True)
         sleep(2)
 
         # with flag silent
-        returned_params_with_flag_1 = self.search_test_object.search_char(search_query_1, True, silent=True)
+        returned_params_with_flag_1 = self.swapi_test_obj.search_char(search_query_1, True, silent=True)
         sleep(2)
-        returned_params_with_flag_2 = self.search_test_object.search_char(search_query_2, True, silent=True)
+        returned_params_with_flag_2 = self.swapi_test_obj.search_char(search_query_2, True, silent=True)
         returned_params_with_flag_2.pop()
         sleep(2)
-        returned_params_with_flag_3 = self.search_test_object.search_char(search_query_3, True, silent=True)
+        returned_params_with_flag_3 = self.swapi_test_obj.search_char(search_query_3, True, silent=True)
         sleep(2)
 
         # with flag not silent
-        returned_params_with_flag_loud = self.search_test_object.search_char(search_query_1, True, silent=False)
+        returned_params_with_flag_loud = self.swapi_test_obj.search_char(search_query_1, True, silent=False)
         sleep(2)
 
         # with no flag no silent
-        returned_params_no_flag_loud = self.search_test_object.search_char(search_query_1, False, silent=False)
+        returned_params_no_flag_loud = self.swapi_test_obj.search_char(search_query_1, False, silent=False)
         sleep(2)
 
         # return one cached
-        returned_params_no_flag_4 = self.search_test_object.search_char(search_query_2, False, silent=True)
-        cache_info_returned = returned_params_no_flag_4.pop() # pop cache_info
+        returned_params_no_flag_4 = self.swapi_test_obj.search_char(search_query_2, False, silent=True)
+        cache_info_returned = returned_params_no_flag_4.pop()  # pop cache_info
 
         self.assertEqual(returned_params_no_flag_2, print_example_no_flag)
         self.assertEqual(returned_params_with_flag_2, print_example_with_flag)
         self.assertEqual(returned_params_no_flag_3, "The force is not strong within you")
         self.assertEqual(returned_params_with_flag_3, "The force is not strong within you")
-        self.assertEqual(returned_params_no_flag_4,print_example_no_flag)
+        self.assertEqual(returned_params_no_flag_4, print_example_no_flag)
         self.assertFalse(returned_params_no_flag_loud)
         self.assertFalse(returned_params_with_flag_loud)
         self.assertTrue(cache_info_returned)
@@ -86,11 +86,11 @@ class TestSwapiDAO(unittest.TestCase):
         self.assertTrue(returned_params_with_flag_1)
 
     def test_fetch_char(self):
-        return_params_1, cache_flag_1 = self.search_test_object.fetch_char(search_query_1)
+        return_params_1, cache_flag_1 = self.swapi_test_obj.fetch_char(search_query_1)
         sleep(2)  # try not to overload the server
-        return_params_2, cache_flag_2 = self.search_test_object.fetch_char(search_query_2)
+        return_params_2, cache_flag_2 = self.swapi_test_obj.fetch_char(search_query_2)
         sleep(2)  # try not to overload the server
-        return_params_3, cache_flag_3 = self.search_test_object.fetch_char(search_query_3)
+        return_params_3, cache_flag_3 = self.swapi_test_obj.fetch_char(search_query_3)
 
         # delete some non constant entries
         del return_params_1["character_info"]["created"]
@@ -113,16 +113,17 @@ class TestSwapiDAO(unittest.TestCase):
 
     def test_fetch_char_with_world(self):
         # fetch the world data
-        return_params_1, cache_flag_1 = self.search_test_object.fetch_char(search_query_1)
+        return_params_1, cache_flag_1 = self.swapi_test_obj.fetch_char(search_query_1)
         sleep(2)  # try not to overload the server
-        return_world_params_1, world_cache_flag_1 = self.search_test_object.fetch_char_with_world(search_query_1, yoda_url)
+        return_world_params_1, world_cache_flag_1 = self.swapi_test_obj.fetch_char_with_world(search_query_1, yoda_url)
         sleep(2)  # try not to overload the server
-        return_params_2, cache_flag_2 = self.search_test_object.fetch_char(search_query_2)
+        return_params_2, cache_flag_2 = self.swapi_test_obj.fetch_char(search_query_2)
         sleep(2)  # try not to overload the server
-        return_world_params_2, world_cache_flag_2 = self.search_test_object.fetch_char_with_world(search_query_2, luke_url)
+        return_world_params_2, world_cache_flag_2 = self.swapi_test_obj.fetch_char_with_world(search_query_2, luke_url)
         sleep(2)  # try not to overload the server
 
-        self.assertRaises(requests.exceptions.ConnectionError,self.search_test_object.fetch_char_with_world, search_query_3, bad_url)
+        self.assertRaises(requests.exceptions.ConnectionError, self.swapi_test_obj.fetch_char_with_world,
+                          search_query_3, bad_url)
 
         # delete some non constant entries
         del return_params_1["character_info"]["created"]
@@ -162,44 +163,44 @@ class TestSwapiDAO(unittest.TestCase):
         self.assertNotEqual(return_params_2["character_time_cached"], return_world_params_2["world_time_cached"])
 
     def test_delete_cache(self):
-        self.assertFalse(self.search_test_object.delete_cache())
+        self.assertFalse(self.cache_test_obj.delete_cache())
 
     def test_print_results(self):
-        return_params_1 = self.search_test_object.print_results(print_name,
-                                                                print_height,
-                                                                print_mass,
-                                                                print_birth,
-                                                                silent=True
-                                                                )
+        return_params_1 = self.swapi_test_obj.print_results(print_name,
+                                                            print_height,
+                                                            print_mass,
+                                                            print_birth,
+                                                            silent=True
+                                                            )
 
-        return_params_2 = self.search_test_object.print_results(print_name,
-                                                                print_height,
-                                                                print_mass,
-                                                                print_birth,
-                                                                print_planet,
-                                                                print_population,
-                                                                print_year_dur,
-                                                                print_day_dur,
-                                                                include_world=True,
-                                                                silent=True
-                                                                )
-        return_params_3 = self.search_test_object.print_results(print_name,
-                                                                print_height,
-                                                                print_mass,
-                                                                print_birth,
-                                                                silent=False
-                                                                )
-        return_params_4 = self.search_test_object.print_results(print_name,
-                                                                print_height,
-                                                                print_mass,
-                                                                print_birth,
-                                                                print_planet,
-                                                                print_population,
-                                                                print_year_dur,
-                                                                print_day_dur,
-                                                                include_world=True,
-                                                                silent=False
-                                                                )
+        return_params_2 = self.swapi_test_obj.print_results(print_name,
+                                                            print_height,
+                                                            print_mass,
+                                                            print_birth,
+                                                            print_planet,
+                                                            print_population,
+                                                            print_year_dur,
+                                                            print_day_dur,
+                                                            include_world=True,
+                                                            silent=True
+                                                            )
+        return_params_3 = self.swapi_test_obj.print_results(print_name,
+                                                            print_height,
+                                                            print_mass,
+                                                            print_birth,
+                                                            silent=False
+                                                            )
+        return_params_4 = self.swapi_test_obj.print_results(print_name,
+                                                            print_height,
+                                                            print_mass,
+                                                            print_birth,
+                                                            print_planet,
+                                                            print_population,
+                                                            print_year_dur,
+                                                            print_day_dur,
+                                                            include_world=True,
+                                                            silent=False
+                                                            )
         self.assertEqual(return_params_1, print_example_no_flag)
         self.assertEqual(return_params_2, print_example_with_flag)
         self.assertFalse(return_params_3)

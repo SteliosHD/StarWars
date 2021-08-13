@@ -1,5 +1,6 @@
 import argparse
 from core.swapiDAO import SwapiDAO
+from core.cache import PersistentCache
 from time import sleep
 
 
@@ -52,14 +53,14 @@ def search_call(search_query,  show_world=False):
 
 
 def clean_cache():
-    swapi_obj = SwapiDAO() # bound to the object but will delete the file anyways
-    swapi_obj.delete_cache()
+    cache_obj = PersistentCache() # bound to the object but will delete the file anyways
+    cache_obj.delete_cache()
     return 1
 
 
 def get_history():
-    swapi_obj = SwapiDAO() # bound to the object but will delete the file anyways
-    swapi_obj.get_history()
+    cached_obj = PersistentCache() # bound to the object but will delete the file anyways
+    cached_obj.get_history()
     return 1
 
 
