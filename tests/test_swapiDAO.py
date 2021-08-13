@@ -16,7 +16,7 @@ from time import sleep
 test_filename = "test_search.json"
 
 
-class TestSearch(unittest.TestCase):
+class TestSwapiDAO(unittest.TestCase):
     """Some testing is better than no testing"""
 
     
